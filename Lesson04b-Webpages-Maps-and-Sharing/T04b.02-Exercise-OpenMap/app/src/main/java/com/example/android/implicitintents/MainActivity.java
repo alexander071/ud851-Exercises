@@ -19,6 +19,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -37,8 +38,8 @@ public class MainActivity extends AppCompatActivity {
      * @param v Button that was clicked.
      */
     public void onClickOpenWebpageButton(View v) {
-        String urlAsString = "http://www.udacity.com";
-        openWebPage(urlAsString);
+        Uri uri = Uri.parse("http://www.udacity.com");
+        viewUri(uri);
     }
 
     /**
@@ -48,12 +49,15 @@ public class MainActivity extends AppCompatActivity {
      * @param v Button that was clicked.
      */
     public void onClickOpenAddressButton(View v) {
-        // TODO (5) Store an address in a String
+        String address = "Tzar Boris III Blvd., 136A, 1618 Sophia";
 
-        // TODO (6) Use Uri.Builder with the appropriate scheme and query to form the Uri for the address
+        Uri uri = new Uri.Builder()
+                .scheme("geo")
+                .path("0,0")
+                .appendQueryParameter("q", address)
+                .build();
 
-        // TODO (7) Replace the Toast with a call to showMap, passing in the Uri from the previous step
-        Toast.makeText(this, "TODO: Open a map when this button is clicked", Toast.LENGTH_SHORT).show();
+        viewUri(uri);
     }
 
     /**
@@ -71,9 +75,8 @@ public class MainActivity extends AppCompatActivity {
      * similar to what I've done above. You can view a list of implicit Intents on the Common
      * Intents page from the developer documentation.
      *
-     * @see <http://developer.android.com/guide/components/intents-common.html/>
-     *
      * @param v Button that was clicked.
+     * @see <http://developer.android.com/guide/components/intents-common.html/>
      */
     public void createYourOwn(View v) {
         Toast.makeText(this,
@@ -82,43 +85,12 @@ public class MainActivity extends AppCompatActivity {
                 .show();
     }
 
-    /**
-     * This method fires off an implicit Intent to open a webpage.
-     *
-     * @param url Url of webpage to open. Should start with http:// or https:// as that is the
-     *            scheme of the URI expected with this Intent according to the Common Intents page
-     */
-    private void openWebPage(String url) {
-        /*
-         * We wanted to demonstrate the Uri.parse method because its usage occurs frequently. You
-         * could have just as easily passed in a Uri as the parameter of this method.
-         */
-        Uri webpage = Uri.parse(url);
-
-        /*
-         * Here, we create the Intent with the action of ACTION_VIEW. This action allows the user
-         * to view particular content. In this case, our webpage URL.
-         */
-        Intent intent = new Intent(Intent.ACTION_VIEW, webpage);
-
-        /*
-         * This is a check we perform with every implicit Intent that we launch. In some cases,
-         * the device where this code is running might not have an Activity to perform the action
-         * with the data we've specified. Without this check, in those cases your app would crash.
-         */
+    private void viewUri(Uri uri) {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(uri);
         if (intent.resolveActivity(getPackageManager()) != null) {
             startActivity(intent);
         }
     }
-
-
-    // TODO (1) Create a method called showMap with a Uri as the single parameter
-    // Do steps 2 - 4 within the showMap method
-        // TODO (2) Create an Intent with action type, Intent.ACTION_VIEW
-
-        // TODO (3) Set the data of the Intent to the Uri passed into this method
-
-        // TODO (4) Verify that this Intent can be launched and then call startActivity
-
 
 }
