@@ -21,6 +21,7 @@ import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -35,6 +36,8 @@ import java.net.URL;
 
 public class MainActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<String> {
+
+    private static final String TAG = MainActivity.class.getSimpleName();
 
     /* A constant to save and restore the URL that is being displayed */
     private static final String SEARCH_QUERY_URL_EXTRA = "query";
@@ -163,31 +166,34 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public Loader<String> onCreateLoader(int id, final Bundle args) {
+        Log.d(TAG, "onCreateLoader");
         return new AsyncTaskLoader<String>(this) {
 
-            // TODO (1) Create a String member variable called mGithubJson that will store the raw JSON
+            private String mGithubSearchResults;
 
             @Override
             protected void onStartLoading() {
-
+                Log.d(TAG, "onStartLoading");
                 /* If no arguments were passed, we don't have a query to perform. Simply return. */
                 if (args == null) {
                     return;
                 }
 
-                /*
-                 * When we initially begin loading in the background, we want to display the
-                 * loading indicator to the user
-                 */
-                mLoadingIndicator.setVisibility(View.VISIBLE);
-
-                // TODO (2) If mGithubJson is not null, deliver that result. Otherwise, force a load
-                forceLoad();
+                if (!takeContentChanged() && mGithubSearchResults != null) {
+                    deliverResult(mGithubSearchResults);
+                } else {
+                    /*
+                     * When we initially begin loading in the background, we want to display the
+                     * loading indicator to the user
+                     */
+                    mLoadingIndicator.setVisibility(View.VISIBLE);
+                    forceLoad();
+                }
             }
 
             @Override
             public String loadInBackground() {
-
+                Log.d(TAG, "loadInBackground");
                 /* Extract the search query from the args using our constant */
                 String searchQueryUrlString = args.getString(SEARCH_QUERY_URL_EXTRA);
 
@@ -207,14 +213,18 @@ public class MainActivity extends AppCompatActivity implements
                 }
             }
 
-            // TODO (3) Override deliverResult and store the data in mGithubJson
-            // TODO (4) Call super.deliverResult after storing the data
+            @Override
+            public void deliverResult(String githubSearchResults) {
+                this.mGithubSearchResults = githubSearchResults;
+                super.deliverResult(githubSearchResults);
+            }
+
         };
     }
 
     @Override
     public void onLoadFinished(Loader<String> loader, String data) {
-
+        Log.i(TAG, "onLoadFinished");
         /* When we finish loading, we want to hide the loading indicator from the user. */
         mLoadingIndicator.setVisibility(View.INVISIBLE);
         /*
