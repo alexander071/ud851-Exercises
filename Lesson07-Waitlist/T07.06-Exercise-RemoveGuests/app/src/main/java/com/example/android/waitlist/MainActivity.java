@@ -39,7 +39,6 @@ public class MainActivity extends AppCompatActivity {
         // Set layout for the RecyclerView, because it's a list we are using the linear layout
         waitlistRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-
         // Create a DB helper (this will create the DB if run for the first time)
         WaitlistDbHelper dbHelper = new WaitlistDbHelper(this);
 
@@ -56,19 +55,20 @@ public class MainActivity extends AppCompatActivity {
         // Link the adapter to the RecyclerView
         waitlistRecyclerView.setAdapter(mAdapter);
 
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+                return false;
+            }
 
-        //TODO (3) Create a new ItemTouchHelper with a SimpleCallback that handles both LEFT and RIGHT swipe directions
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+                long guestId = (long) viewHolder.itemView.getTag();
+                removeGuest(guestId);
 
-        // TODO (4) Override onMove and simply return false inside
-
-        // TODO (5) Override onSwiped
-
-        // TODO (8) Inside, get the viewHolder's itemView's tag and store in a long variable id
-        // TODO (9) call removeGuest and pass through that id
-        // TODO (10) call swapCursor on mAdapter passing in getAllGuests() as the argument
-
-        //TODO (11) attach the ItemTouchHelper to the waitlistRecyclerView
-
+                mAdapter.swapCursor(getAllGuests());
+            }
+        }).attachToRecyclerView(waitlistRecyclerView);
     }
 
     /**
@@ -102,8 +102,6 @@ public class MainActivity extends AppCompatActivity {
         mNewPartySizeEditText.getText().clear();
     }
 
-
-
     /**
      * Query the mDb and get all guests from the waitlist table
      *
@@ -124,7 +122,7 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Adds a new guest to the mDb including the party count and the current timestamp
      *
-     * @param name  Guest's name
+     * @param name      Guest's name
      * @param partySize Number in party
      * @return id of new record added
      */
@@ -135,10 +133,7 @@ public class MainActivity extends AppCompatActivity {
         return mDb.insert(WaitlistContract.WaitlistEntry.TABLE_NAME, null, cv);
     }
 
-
-    // TODO (1) Create a new function called removeGuest that takes long id as input and returns a boolean
-
-    // TODO (2) Inside, call mDb.delete to pass in the TABLE_NAME and the condition that WaitlistEntry._ID equals id
-
-
+    private boolean removeGuest(long id) {
+        return mDb.delete(WaitlistContract.WaitlistEntry.TABLE_NAME, WaitlistContract.WaitlistEntry._ID + "=" + id, null) > 0;
+    }
 }
