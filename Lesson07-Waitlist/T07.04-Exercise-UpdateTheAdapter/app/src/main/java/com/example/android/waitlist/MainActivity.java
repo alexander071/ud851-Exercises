@@ -19,7 +19,6 @@ public class MainActivity extends AppCompatActivity {
 
     private SQLiteDatabase mDb;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,7 +32,6 @@ public class MainActivity extends AppCompatActivity {
         // Set layout for the RecyclerView, because it's a list we are using the linear layout
         waitlistRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-
         // Create a DB helper (this will create the DB if run for the first time)
         WaitlistDbHelper dbHelper = new WaitlistDbHelper(this);
 
@@ -41,19 +39,17 @@ public class MainActivity extends AppCompatActivity {
         // because you will be adding restaurant customers
         mDb = dbHelper.getWritableDatabase();
 
-        //Fill the database with fake data
+        // Fill the database with fake data
         TestUtil.insertFakeData(mDb);
 
         // Get all guest info from the database and save in a cursor
         Cursor cursor = getAllGuests();
 
-        // TODO (10) Pass the entire cursor to the adapter rather than just the count
         // Create an adapter for that cursor to display the data
-        mAdapter = new GuestListAdapter(this, cursor.getCount());
+        mAdapter = new GuestListAdapter(this, cursor);
 
         // Link the adapter to the RecyclerView
         waitlistRecyclerView.setAdapter(mAdapter);
-
     }
 
     /**
@@ -64,8 +60,6 @@ public class MainActivity extends AppCompatActivity {
     public void addToWaitlist(View view) {
 
     }
-
-
 
     /**
      * Query the mDb and get all guests from the waitlist table
@@ -83,6 +77,4 @@ public class MainActivity extends AppCompatActivity {
                 WaitlistContract.WaitlistEntry.COLUMN_TIMESTAMP
         );
     }
-
-
 }
