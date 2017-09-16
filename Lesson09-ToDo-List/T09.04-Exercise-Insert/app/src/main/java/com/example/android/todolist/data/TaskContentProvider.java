@@ -17,10 +17,13 @@
 package com.example.android.todolist.data;
 
 import android.content.ContentProvider;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 
@@ -78,16 +81,24 @@ public class TaskContentProvider extends ContentProvider {
 
     @Override
     public Uri insert(@NonNull Uri uri, ContentValues values) {
-        // TODO (1) Get access to the task database (to write new data to)
+        int match = sUriMatcher.match(uri);
+        switch (match) {
+            case TASKS:
+                Uri taskUri = insertTask(values);
+                getContext().getContentResolver().notifyChange(taskUri, null);
+                return taskUri;
+            default:
+                throw new UnsupportedOperationException("Unknown URI: " + uri);
+        }
+    }
 
-        // TODO (2) Write URI matching code to identify the match for the tasks directory
-
-        // TODO (3) Insert new values into the database
-        // TODO (4) Set the value for the returnedUri and write the default case for unknown URI's
-
-        // TODO (5) Notify the resolver if the uri has been changed, and return the newly inserted URI
-
-        throw new UnsupportedOperationException("Not yet implemented");
+    private Uri insertTask(ContentValues values) {
+        SQLiteDatabase db = mTaskDbHelper.getWritableDatabase();
+        long insertedRowId = db.insert(TaskContract.TaskEntry.TABLE_NAME, null, values);
+        if (insertedRowId == -1) {
+            throw new SQLiteException("Could not insert new task in the database.");
+        }
+        return ContentUris.withAppendedId(TaskContract.TaskEntry.CONTENT_URI, insertedRowId);
     }
 
 
